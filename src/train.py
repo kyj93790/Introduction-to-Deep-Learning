@@ -86,14 +86,42 @@ def validate(model, testloader, criterion):
     epoch_acc = 100. * (valid_running_correct / len(testloader.dataset))
     return epoch_loss, epoch_acc
 
+# Test function.
+def test(model, testloader, criterion):
+    model.eval()
+    print('Test')
+    test_running_loss = 0.0
+    test_running_correct = 0
+    counter = 0
+    with torch.no_grad():
+        for i, data in tqdm(enumerate(testloader), total=len(testloader)):
+            counter += 1
+
+            image, labels = data
+            image = image.to(device)
+            labels = labels.to(device)
+            # Forward pass.
+            outputs = model(image)
+            # Calculate the loss.
+            loss = criterion(outputs, labels)
+            test_running_loss += loss.item()
+            # Calculate the accuracy.
+            _, preds = torch.max(outputs.data, 1)
+            test_running_correct += (preds == labels).sum().item()
+
+    # Loss and accuracy for the complete epoch.
+    epoch_loss = test_running_loss / counter
+    epoch_acc = 100. * (test_running_correct / len(testloader.dataset))
+    return epoch_loss, epoch_acc
+
 if __name__ == '__main__':
     # Load the training and validation datasets.
-    dataset_train, dataset_valid, dataset_classes = get_datasets(args['pretrained'])
+    dataset_train, dataset_valid, dataset_test, dataset_classes = get_datasets(args['pretrained'])
     print(f"[INFO]: Number of training images: {len(dataset_train)}")
     print(f"[INFO]: Number of validation images: {len(dataset_valid)}")
     print(f"[INFO]: Class names: {dataset_classes}\n")
     # Load the training and validation data loaders.
-    train_loader, valid_loader = get_data_loaders(dataset_train, dataset_valid)
+    train_loader, valid_loader, test_loader = get_data_loaders(dataset_train, dataset_valid, dataset_test)
 
     # Learning_parameters. 
     lr = args['learning_rate']
@@ -145,3 +173,7 @@ if __name__ == '__main__':
     # Save the loss and accuracy plots.
     save_plots(train_acc, valid_acc, train_loss, valid_loss, args['pretrained'])
     print('TRAINING COMPLETE')
+    print('-'*22 + 'RESULT' + '-'*22)
+    test_loss, test_acc = test(model, test_loader, criterion)
+    print(f"Test loss: {valid_epoch_loss:.3f}, Test acc: {valid_epoch_acc:.3f}")
+    print('-'*50)
