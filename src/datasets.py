@@ -66,16 +66,19 @@ def get_datasets(pretrained):
 
     # Calculate the validation dataset size.
     valid_size = int(VALID_SPLIT*dataset_size)
+    # Set test dataset size
+    test_size = valid_size
 
     # Radomize the data indices.
     indices = torch.randperm(len(dataset)).tolist()
     # Training and validation sets.
-    dataset_train = Subset(dataset, indices[:-valid_size])
-    dataset_valid = Subset(dataset_val, indices[-valid_size:])
+    dataset_train = Subset(dataset, indices[:-valid_size-test_size])
+    dataset_valid = Subset(dataset_val, indices[-valid_size-test_size:-test_size])
+    dataset_test = Subset(dataset_val, indices[-test_size:])
 
-    return dataset_train, dataset_valid, dataset.classes
+    return dataset_train, dataset_valid, dataset_test, dataset.classes
 
-def get_data_loaders(dataset_train, dataset_valid):
+def get_data_loaders(dataset_train, dataset_valid, dataset_test):
     """
     Prepares the training and validation data loaders.
 
@@ -92,4 +95,8 @@ def get_data_loaders(dataset_train, dataset_valid):
         dataset_valid, batch_size=BATCH_SIZE, 
         shuffle=False, num_workers=NUM_WORKERS
     )
-    return train_loader, valid_loader 
+    test_loader = DataLoader(
+        dataset_test, batch_size=BATCH_SIZE,
+        shuffle=False, num_workers=NUM_WORKERS
+    )
+    return train_loader, valid_loader, test_loader
