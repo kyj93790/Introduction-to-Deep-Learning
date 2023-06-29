@@ -56,13 +56,13 @@ for image_path in all_image_paths:
     cv2.putText(
         orig_image, f"GT: {gt_class_name}",
         (10, 25), cv2.FONT_HERSHEY_SIMPLEX,
-        1.0, (0, 255, 0), 2, lineType=cv2.LINE_AA
+        0.7, (0, 255, 0), 2, lineType=cv2.LINE_AA
     )
     # Annotate the image with prediction.
     cv2.putText(
         orig_image, f"Pred: {pred_class_name.lower()}",
         (10, 55), cv2.FONT_HERSHEY_SIMPLEX,
-        1.0, (100, 100, 225), 2, lineType=cv2.LINE_AA
+        0.7, (100, 100, 225), 2, lineType=cv2.LINE_AA
     ) 
     #cv2.imshow('Result', orig_image)
     #cv2.waitKey(0)
